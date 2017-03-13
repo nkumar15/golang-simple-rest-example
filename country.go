@@ -73,7 +73,6 @@ func GetCountries() ([]Country, error) {
 		log.Println(dbc.Error)
 		return nil, dbc.Error
 	}
-
 	return countries, nil
 }
 
