@@ -13,7 +13,8 @@ type Route struct {
 
 type Routes []Route
 
-var routes = Routes{
+
+var cityRoutes = Routes{
 	Route{
 		"Index",
 		"GET",
@@ -50,4 +51,38 @@ var routes = Routes{
 		"/cities/{id}",
 		UpdateCityByIdHandler,
 	},
+}
+
+
+var countryRoutes = Routes{
+	Route{
+		"GetCountriesHandler",
+		"GET",
+		"/countries",
+		GetCountriesHandler,
+	},
+	Route{
+		"GetCountryHandler",
+		"GET",
+		"/countries/{code}",
+		GetCountryHandler,
+	},
+	Route{
+		"CreateCountryHandler",
+		"POST",
+		"/countries",
+		CreateCountryHandler,
+	},
+	Route{
+		"DeleteCountryHandler",
+		"DELETE",
+		"/countries/{code}",
+		DeleteCountryHandler,
+	},
+	//Route{
+	//	"UpdateCountryHandler",
+	//	"PUT",
+	//	"/countries/{id}",
+	//	UpdateCityByIdHandler,
+	//},
 }

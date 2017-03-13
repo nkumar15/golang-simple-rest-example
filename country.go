@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"log"
 )
 
 type Country struct {
@@ -15,25 +16,90 @@ func (c *Country) TableName() string {
 	return "Countries"
 }
 
-func CreateCountryTable() {
-	db, err := gorm.Open("sqlite3", "./logistics.db")
-
+func checkError(err error) {
 	if err != nil {
+		panic(err)
 	}
-
-	if !db.HasTable(&Country{}) {
-		db.CreateTable(&Country{})
-	}
-
 }
 
-func CreateCountry(c Country) {
-	db, err := gorm.Open("sqlite3", "./logistics.db")
+func initDb() (*gorm.DB, error) {
+	db, err := gorm.Open("sqlite3", "./db1.db")
+	return db, err
+}
 
-	if err != nil {
-	}
+func CreateCountriesTable() {
+	db, err := initDb()
 	defer db.Close()
+	checkError(err)
 
-	db.NewRecord(c)
-	db.Create(&c)
+	dbc := db.DropTable(&Country{})
+	if dbc.Error != nil {
+		log.Println(dbc.Error)
+	}
+	db.CreateTable(&Country{})
+}
+
+func InsertCountries() {
+        countries := []Country{{Name: "India", Code: "IN"},
+                {Name: "Singapore", Code: "SG"},
+                {Name: "Australia", Code: "AU"},
+        }
+
+        for _, country := range countries {
+                CreateCountry(country)
+        }
+}
+
+func CreateCountry(c Country) error {
+	db, err := initDb()
+	defer db.Close()
+	checkError(err)
+
+	dbc := db.Create(&c)
+	if dbc.Error != nil {
+		log.Println(dbc.Error)
+	}
+	return dbc.Error
+}
+
+func GetCountries() []Country {
+	db, err := initDb()
+	defer db.Close()
+	checkError(err)
+
+	var countries []Country
+	db.Find(&countries)
+
+	for _, c := range countries {
+		log.Println(c.Code, ":", c.Name)
+	}
+
+	return countries
+}
+
+func GetCountry(code string) Country {
+	db, err := initDb()
+	defer db.Close()
+	checkError(err)
+
+	var country Country
+	dbc := db.Where("code = ?", code).Find(&country)
+	if dbc.Error != nil {
+		log.Println(dbc.Error)
+                country = Country{}
+	}
+
+	return country
+}
+
+func DeleteCountry(code string) error {
+	db, err := initDb()
+	defer db.Close()
+	checkError(err)
+
+	dbc := db.Where("code = ?", code).Delete(Country{})
+	if dbc.Error != nil {
+		log.Println(dbc.Error)
+	}
+	return dbc.Error
 }
