@@ -13,7 +13,6 @@ type Route struct {
 
 type Routes []Route
 
-
 var cityRoutes = Routes{
 	Route{
 		"Index",
@@ -52,7 +51,6 @@ var cityRoutes = Routes{
 		UpdateCityByIdHandler,
 	},
 }
-
 
 var countryRoutes = Routes{
 	Route{

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"github.com/jinzhu/gorm"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -11,9 +12,15 @@ import (
 func GetCountriesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 
-        var countries []Country
-        countries = GetCountries()
-	if err := json.NewEncoder(w).Encode(countries); err != nil {
+	var countries []Country
+	countries, err := GetCountries()
+
+	if err != nil && err != gorm.ErrRecordNotFound {
+		w.WriteHeader(http.StatusInternalServerError)
+		panic(err)
+	}
+
+	if err = json.NewEncoder(w).Encode(countries); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		panic(err)
 	}
@@ -27,8 +34,18 @@ func GetCountryHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	code := vars["code"]
 
-        var country Country
-	country = GetCountry(code)
+	var country Country
+	country, err := GetCountry(code)
+
+	if err != nil && err == gorm.ErrRecordNotFound {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+        if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		panic(err)
+	}
 
 	if err := json.NewEncoder(w).Encode(country); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

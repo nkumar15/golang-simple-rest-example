@@ -40,14 +40,14 @@ func CreateCountriesTable() {
 }
 
 func InsertCountries() {
-        countries := []Country{{Name: "India", Code: "IN"},
-                {Name: "Singapore", Code: "SG"},
-                {Name: "Australia", Code: "AU"},
-        }
+	countries := []Country{{Name: "India", Code: "IN"},
+		{Name: "Singapore", Code: "SG"},
+		{Name: "Australia", Code: "AU"},
+	}
 
-        for _, country := range countries {
-                CreateCountry(country)
-        }
+	for _, country := range countries {
+		CreateCountry(country)
+	}
 }
 
 func CreateCountry(c Country) error {
@@ -62,34 +62,34 @@ func CreateCountry(c Country) error {
 	return dbc.Error
 }
 
-func GetCountries() []Country {
+func GetCountries() ([]Country, error) {
 	db, err := initDb()
 	defer db.Close()
 	checkError(err)
 
 	var countries []Country
-	db.Find(&countries)
-
-	for _, c := range countries {
-		log.Println(c.Code, ":", c.Name)
+	dbc := db.Find(&countries)
+	if dbc.Error != nil {
+		log.Println(dbc.Error)
+		return nil, dbc.Error
 	}
 
-	return countries
+	return countries, nil
 }
 
-func GetCountry(code string) Country {
+func GetCountry(code string) (Country, error) {
 	db, err := initDb()
 	defer db.Close()
 	checkError(err)
 
 	var country Country
 	dbc := db.Where("code = ?", code).Find(&country)
+
 	if dbc.Error != nil {
 		log.Println(dbc.Error)
-                country = Country{}
+		return Country{}, dbc.Error
 	}
-
-	return country
+	return country, nil
 }
 
 func DeleteCountry(code string) error {
