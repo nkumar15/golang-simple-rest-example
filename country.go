@@ -100,5 +100,6 @@ func DeleteCountry(code string) error {
 	if dbc.Error != nil {
 		log.Println(dbc.Error)
 	}
-	return dbc.Error
+	
+        return dbc.Error
 }
