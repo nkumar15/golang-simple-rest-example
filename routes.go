@@ -84,3 +84,18 @@ var countryRoutes = Routes{
 	//	UpdateCityByIdHandler,
 	//},
 }
+
+var branchRoutes = Routes{
+	Route{
+		"GetBranchesHandler",
+		"GET",
+		"/branches",
+		GetBranchesHandler,
+	},
+	Route{
+		"CreateBrancheHandler",
+		"POST",
+		"/branches",
+		CreateBranchHandler,
+	},
+}

@@ -18,12 +18,13 @@ func (c *Country) TableName() string {
 
 func checkError(err error) {
 	if err != nil {
-		panic(err)
+		log.Println(err.Error())
 	}
 }
 
 func initDb() (*gorm.DB, error) {
 	db, err := gorm.Open("sqlite3", "./db1.db")
+
 	return db, err
 }
 
@@ -33,10 +34,10 @@ func CreateCountriesTable() {
 	checkError(err)
 
 	dbc := db.DropTable(&Country{})
-	if dbc.Error != nil {
-		log.Println(dbc.Error)
-	}
-	db.CreateTable(&Country{})
+	checkError(dbc.Error)
+
+	dbc = db.CreateTable(&Country{})
+	checkError(dbc.Error)
 }
 
 func InsertCountries() {
@@ -50,16 +51,16 @@ func InsertCountries() {
 	}
 }
 
-func CreateCountry(c Country) error {
+func CreateCountry(c Country) (Country, error) {
 	db, err := initDb()
 	defer db.Close()
 	checkError(err)
 
 	dbc := db.Create(&c)
-	if dbc.Error != nil {
-		log.Println(dbc.Error)
-	}
-	return dbc.Error
+	log.Println(dbc.Value)
+	checkError(dbc.Error)
+
+	return c, dbc.Error
 }
 
 func GetCountries() ([]Country, error) {
@@ -100,6 +101,6 @@ func DeleteCountry(code string) error {
 	if dbc.Error != nil {
 		log.Println(dbc.Error)
 	}
-	
-        return dbc.Error
+
+	return dbc.Error
 }

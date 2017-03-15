@@ -42,7 +42,7 @@ func GetCountryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-        if err != nil {
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		panic(err)
 	}
@@ -75,13 +75,19 @@ func CreateCountryHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = CreateCountry(country)
-	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+	c, err := CreateCountry(country)
 
-	//if err := json.NewEncoder(w).Encode(c); err != nil {
-	//	w.WriteHeader(http.StatusInternalServerError)
-	//	panic(err)
-	//}
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		checkError(err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+	if err := json.NewEncoder(w).Encode(c); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		panic(err)
+	}
 
 	w.WriteHeader(http.StatusCreated)
 }

@@ -11,8 +11,9 @@ func ServeWeb() {
 }
 
 func main() {
-	CreateCountriesTable()
-	InsertCountries()
+	//CreateCountriesTable()
+	//InsertCountries()
+	//CreateBranch()
 	ServeWeb()
 	//GetCountries()
 	//DeleteCountry("AU")
