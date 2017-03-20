@@ -1,106 +1,102 @@
 package main
 
 import (
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"log"
+	"time"
+	"upper.io/db.v3"
+	"upper.io/db.v3/lib/sqlbuilder"
+	"upper.io/db.v3/sqlite"
 )
 
 type Country struct {
-	gorm.Model
-	Code string `sql:"char(2);unique"`
-	Name string `sql:varchar(100);unique"`
+	ID   int    `db:"Id,omitempty"`
+	Code string `db:"Code,omitempty"`
+	Name string `db:"Name,omitempty"`
+	CommonFields
 }
 
-func (c *Country) TableName() string {
-	return "Countries"
-}
+func logIfError(err error) {
 
-func checkError(err error) {
 	if err != nil {
-		log.Println(err.Error())
-	}
-}
-
-func initDb() (*gorm.DB, error) {
-	db, err := gorm.Open("sqlite3", "./db1.db")
-
-	return db, err
-}
-
-func CreateCountriesTable() {
-	db, err := initDb()
-	defer db.Close()
-	checkError(err)
-
-	dbc := db.DropTable(&Country{})
-	checkError(dbc.Error)
-
-	dbc = db.CreateTable(&Country{})
-	checkError(dbc.Error)
-}
-
-func InsertCountries() {
-	countries := []Country{{Name: "India", Code: "IN"},
-		{Name: "Singapore", Code: "SG"},
-		{Name: "Australia", Code: "AU"},
+		log.Println(err)
 	}
 
-	for _, country := range countries {
-		CreateCountry(country)
-	}
 }
 
-func CreateCountry(c Country) (Country, error) {
-	db, err := initDb()
-	defer db.Close()
-	checkError(err)
+var settings = sqlite.ConnectionURL{
+	Database: `./db/migrations/database.sqlite`,
+}
 
-	dbc := db.Create(&c)
-	log.Println(dbc.Value)
-	checkError(dbc.Error)
+func openDb() sqlbuilder.Database {
+	sess, err := sqlite.Open(settings)
 
-	return c, dbc.Error
+	if err != nil {
+		log.Fatal("sqlite.open: %s", err)
+		panic(err)
+	}
+
+	return sess
 }
 
 func GetCountries() ([]Country, error) {
-	db, err := initDb()
-	defer db.Close()
-	checkError(err)
 
-	var countries []Country
-	dbc := db.Find(&countries)
-	if dbc.Error != nil {
-		log.Println(dbc.Error)
-		return nil, dbc.Error
+	sess := openDb()
+	defer sess.Close()
+
+	countries := make([]Country, 0)
+
+	col := sess.Collection("Countries")
+	res := col.Find()
+
+	err := res.All(&countries)
+
+	if err == db.ErrNoMoreRows {
+		return make([]Country, 0), nil
 	}
-	return countries, nil
+	return countries, err
 }
 
 func GetCountry(code string) (Country, error) {
-	db, err := initDb()
-	defer db.Close()
-	checkError(err)
+
+	sess := openDb()
+	defer sess.Close()
 
 	var country Country
-	dbc := db.Where("code = ?", code).Find(&country)
 
-	if dbc.Error != nil {
-		log.Println(dbc.Error)
-		return Country{}, dbc.Error
+	col := sess.Collection("Countries")
+	res := col.Find(db.Cond{"Code": code})
+
+	err := res.One(&country)
+
+	if err == db.ErrNoMoreRows {
+		return country, ErrNoMoreRows
 	}
-	return country, nil
+
+	return country, err
+}
+
+func CreateCountry(c Country) (Country, error) {
+	sess := openDb()
+	defer sess.Close()
+
+	c.CreatedAt = time.Now()
+	c.UpdatedAt = time.Now()
+	c.DeletedAt = nil
+
+	id, err := sess.Collection("Countries").Insert(c)
+	logIfError(err)
+	log.Println(id)
+	return c, err
 }
 
 func DeleteCountry(code string) error {
-	db, err := initDb()
-	defer db.Close()
-	checkError(err)
 
-	dbc := db.Where("code = ?", code).Delete(Country{})
-	if dbc.Error != nil {
-		log.Println(dbc.Error)
-	}
+	sess := openDb()
+	defer sess.Close()
 
-	return dbc.Error
+	col := sess.Collection("Countries")
+	res := col.Find(db.Cond{"code": code})
+	err := res.Delete()
+
+	return err
 }

@@ -3,26 +3,23 @@ package main
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
 	"io"
 	"io/ioutil"
 	"net/http"
 )
 
 func GetCountriesHandler(w http.ResponseWriter, r *http.Request) {
+
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 
-	var countries []Country
 	countries, err := GetCountries()
 
-	if err != nil && err != gorm.ErrRecordNotFound {
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		panic(err)
 	}
 
 	if err = json.NewEncoder(w).Encode(countries); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		panic(err)
 	}
 
 	w.WriteHeader(http.StatusOK)
@@ -31,47 +28,45 @@ func GetCountriesHandler(w http.ResponseWriter, r *http.Request) {
 func GetCountryHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+
 	vars := mux.Vars(r)
 	code := vars["code"]
 
 	var country Country
 	country, err := GetCountry(code)
 
-	if err != nil && err == gorm.ErrRecordNotFound {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
 	if err != nil {
+		if err == ErrNoMoreRows {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
 		w.WriteHeader(http.StatusInternalServerError)
-		panic(err)
+		return
 	}
 
 	if err := json.NewEncoder(w).Encode(country); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		panic(err)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 }
 
 func CreateCountryHandler(w http.ResponseWriter, r *http.Request) {
+
 	var country Country
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
 	}
 
 	if err := r.Body.Close(); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		panic(err)
 	}
 
 	if err := json.Unmarshal(body, &country); err != nil {
 		w.WriteHeader(422) // unprocessable entity
 		if err := json.NewEncoder(w).Encode(err); err != nil {
-			panic(err)
 		}
 	}
 
@@ -79,14 +74,12 @@ func CreateCountryHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		checkError(err)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 	if err := json.NewEncoder(w).Encode(c); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		panic(err)
 	}
 
 	w.WriteHeader(http.StatusCreated)
