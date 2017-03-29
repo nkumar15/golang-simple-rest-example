@@ -46,3 +46,22 @@ func Test_GetCountry(t *testing.T) {
 	country, err := GetCountry(countries[0].Code)
 	report1(t.Name(), err != nil || country.Name != countries[0].Name, t)
 }
+
+func Test_GetCountries(t *testing.T) {
+	_, err := CreateCountry(countries[1])
+	if err != nil {
+		report1(t.Name(), true, t)
+	}
+
+	var cntries []Country
+	cntries, err = GetCountries()
+
+	if err != nil {
+		report1(t.Name(), true, t)
+	}
+	if cntries[0].Code != countries[0].Code || cntries[0].Name != countries[0].Name || cntries[1].Code != countries[1].Code || cntries[1].Name != countries[1].Name {
+		report1(t.Name(), true, t)
+	}
+
+	report1(t.Name(), false, t)
+}
