@@ -107,3 +107,23 @@ func DeleteCountries() error {
 
 	return err
 }
+
+func UpdateCountry(country Country) error {
+	sess, err := ConnectDB()
+	logIfError(err)
+
+	defer sess.Close()
+
+	col := sess.Collection("Countries")
+
+	res := col.Find("Code", country.Code)
+	defer res.Close()
+
+	err = res.Update(Country{
+		Name: country.Name,
+		//UpdatedAt: time.Now(),
+	})
+
+	return err
+
+}
