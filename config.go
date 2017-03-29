@@ -1,7 +1,6 @@
 package location
 
 import (
-	"database/sql"
 	"log"
 	"time"
 	"upper.io/db.v3/lib/sqlbuilder"
@@ -9,7 +8,7 @@ import (
 )
 
 type Env struct {
-	DB *sql.DB
+	db *sqlbuilder.Database
 }
 
 type CommonFields struct {
@@ -22,18 +21,20 @@ var settings = sqlite.ConnectionURL{
 	Database: `./db/migrations/database.sqlite`,
 }
 
-func ConnectDB() sqlbuilder.Database {
-	db, err := sqlite.Open(settings)
+// Connects to database and returns the database object if successful
+// Otherwise err is also returned
+func ConnectDB() (sqlbuilder.Database, error) {
 
+	db, err := sqlite.Open(settings)
 	if err != nil {
 		log.Fatal("sqlite.open: %s", err)
-		panic(err)
+		return nil, err
 	}
 
-	if err1 := db.Ping(); err1 != nil {
-		log.Fatal("Not able to ping database.", err1)
-		panic(err)
+	err = db.Ping()
+	if err != nil {
+		log.Fatal("Not able to ping database.", err)
+		return nil, err
 	}
-
-	return db
+	return db, nil
 }

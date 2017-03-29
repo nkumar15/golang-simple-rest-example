@@ -8,7 +8,8 @@ import (
 
 func CreateBranch(branch Branch) (Branch, error) {
 
-	sess := ConnectDB()
+	sess, err := ConnectDB()
+	logIfError(err)
 	defer sess.Close()
 
 	branches := sess.Collection("Branches")
@@ -28,13 +29,15 @@ func CreateBranch(branch Branch) (Branch, error) {
 }
 
 func GetBranches() ([]Branch, error) {
-	sess := ConnectDB()
+	sess, err := ConnectDB()
+	logIfError(err)
+
 	defer sess.Close()
 
 	var branches []Branch
 	brs := sess.Collection("Branches")
 	res := brs.Find(db.Cond{"DeletedAt": nil})
-	err := res.All(&branches)
+	err = res.All(&branches)
 
 	if err != nil {
 		fmt.Println(err)

@@ -16,7 +16,9 @@ func logIfError(err error) {
 
 func GetCountries() ([]Country, error) {
 
-	sess := ConnectDB()
+	sess, err := ConnectDB()
+	logIfError(err)
+
 	defer sess.Close()
 
 	countries := make([]Country, 0)
@@ -26,7 +28,7 @@ func GetCountries() ([]Country, error) {
 	res := col.Find()
 	defer res.Close()
 
-	err := res.All(&countries)
+	err = res.All(&countries)
 
 	if err == db.ErrNoMoreRows {
 		return make([]Country, 0), nil
@@ -36,7 +38,9 @@ func GetCountries() ([]Country, error) {
 
 func GetCountry(code string) (Country, error) {
 
-	sess := ConnectDB()
+	sess, err := ConnectDB()
+	logIfError(err)
+
 	defer sess.Close()
 
 	var country Country
@@ -46,7 +50,7 @@ func GetCountry(code string) (Country, error) {
 	res := col.Find(db.Cond{"Code": code})
 	defer res.Close()
 
-	err := res.One(&country)
+	err = res.One(&country)
 
 	if err == db.ErrNoMoreRows {
 		return country, ErrNoMoreRows
@@ -56,7 +60,9 @@ func GetCountry(code string) (Country, error) {
 }
 
 func CreateCountry(c Country) (Country, error) {
-	sess := ConnectDB()
+	sess, err := ConnectDB()
+	logIfError(err)
+
 	defer sess.Close()
 
 	c.CreatedAt = time.Now()
@@ -71,13 +77,15 @@ func CreateCountry(c Country) (Country, error) {
 
 func DeleteCountry(code string) error {
 
-	sess := ConnectDB()
+	sess, err := ConnectDB()
+	logIfError(err)
+
 	defer sess.Close()
 
 	col := sess.Collection("Countries")
 
 	res := col.Find(db.Cond{"code": code})
-	err := res.Delete()
+	err = res.Delete()
 
 	return err
 }
