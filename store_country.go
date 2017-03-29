@@ -48,6 +48,7 @@ func GetCountry(code string) (Country, error) {
 	col := sess.Collection("Countries")
 
 	res := col.Find(db.Cond{"Code": code})
+
 	defer res.Close()
 
 	err = res.One(&country)
@@ -85,6 +86,23 @@ func DeleteCountry(code string) error {
 	col := sess.Collection("Countries")
 
 	res := col.Find(db.Cond{"code": code})
+	defer res.Close()
+	err = res.Delete()
+
+	return err
+}
+
+func DeleteCountries() error {
+
+	sess, err := ConnectDB()
+	logIfError(err)
+
+	defer sess.Close()
+
+	col := sess.Collection("Countries")
+
+	res := col.Find()
+	defer res.Close()
 	err = res.Delete()
 
 	return err
