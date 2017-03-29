@@ -1,10 +1,10 @@
-package main
+package location
 
 import "errors"
 
 var (
 	ErrNoMoreRows               = errors.New(`location: no more rows in this result set`)
-	ErrNotConnected             = errors.New(`location: you're currently not connected`)
+	ErrUniqueConstraint         = errors.New(`location: UNIQUE constraint failed`)
 	ErrMissingDatabaseName      = errors.New(`location: missing database name`)
 	ErrMissingCollectionName    = errors.New(`location: missing collection name`)
 	ErrCollectionDoesNotExist   = errors.New(`location: collection does not exist`)

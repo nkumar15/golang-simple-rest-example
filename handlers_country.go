@@ -1,28 +1,29 @@
-package main
+package location
 
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"strings"
 )
 
 func GetCountriesHandler(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
-
 	countries, err := GetCountries()
 
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
 	}
 
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 	if err = json.NewEncoder(w).Encode(countries); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func GetCountryHandler(w http.ResponseWriter, r *http.Request) {
@@ -54,35 +55,47 @@ func GetCountryHandler(w http.ResponseWriter, r *http.Request) {
 
 func CreateCountryHandler(w http.ResponseWriter, r *http.Request) {
 
-	var country Country
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	if err := r.Body.Close(); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
+	var country Country
 	if err := json.Unmarshal(body, &country); err != nil {
 		w.WriteHeader(422) // unprocessable entity
-		if err := json.NewEncoder(w).Encode(err); err != nil {
-		}
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(err); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	c, err := CreateCountry(country)
 
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("Some error from create country")
+		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+			w.WriteHeader(http.StatusConflict)
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
+	} else {
+		log.Println("creating proper response")
+		w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+		w.WriteHeader(http.StatusCreated)
+		if err := json.NewEncoder(w).Encode(c); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
-
-	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
-	if err := json.NewEncoder(w).Encode(c); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-
-	w.WriteHeader(http.StatusCreated)
 }
 
 /*

@@ -1,52 +1,30 @@
-package main
+package location
 
 import (
 	"log"
 	"time"
-	"upper.io/db.v3"
-	"upper.io/db.v3/lib/sqlbuilder"
-	"upper.io/db.v3/sqlite"
+	"upper.io/db.v2"
 )
-
-type Country struct {
-	ID   int    `db:"Id,omitempty"`
-	Code string `db:"Code,omitempty"`
-	Name string `db:"Name,omitempty"`
-	CommonFields
-}
 
 func logIfError(err error) {
 
 	if err != nil {
-		log.Println(err)
+		log.Println("Error: ", err)
 	}
 
-}
-
-var settings = sqlite.ConnectionURL{
-	Database: `./db/migrations/database.sqlite`,
-}
-
-func openDb() sqlbuilder.Database {
-	sess, err := sqlite.Open(settings)
-
-	if err != nil {
-		log.Fatal("sqlite.open: %s", err)
-		panic(err)
-	}
-
-	return sess
 }
 
 func GetCountries() ([]Country, error) {
 
-	sess := openDb()
+	sess := ConnectDB()
 	defer sess.Close()
 
 	countries := make([]Country, 0)
 
 	col := sess.Collection("Countries")
+
 	res := col.Find()
+	defer res.Close()
 
 	err := res.All(&countries)
 
@@ -58,13 +36,15 @@ func GetCountries() ([]Country, error) {
 
 func GetCountry(code string) (Country, error) {
 
-	sess := openDb()
+	sess := ConnectDB()
 	defer sess.Close()
 
 	var country Country
 
 	col := sess.Collection("Countries")
+
 	res := col.Find(db.Cond{"Code": code})
+	defer res.Close()
 
 	err := res.One(&country)
 
@@ -76,7 +56,7 @@ func GetCountry(code string) (Country, error) {
 }
 
 func CreateCountry(c Country) (Country, error) {
-	sess := openDb()
+	sess := ConnectDB()
 	defer sess.Close()
 
 	c.CreatedAt = time.Now()
@@ -91,10 +71,11 @@ func CreateCountry(c Country) (Country, error) {
 
 func DeleteCountry(code string) error {
 
-	sess := openDb()
+	sess := ConnectDB()
 	defer sess.Close()
 
 	col := sess.Collection("Countries")
+
 	res := col.Find(db.Cond{"code": code})
 	err := res.Delete()
 
