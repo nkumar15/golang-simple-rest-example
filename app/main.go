@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/nkumar15/location"
+	lc "github.com/nkumar15/location"
 	"log"
 	"net/http"
 )
 
 func ServeWeb() {
-	router := NewRouter()
+	router := lc.NewRouter()
 	log.Fatal(http.ListenAndServe(":5000", router))
 }
 
