@@ -73,6 +73,8 @@ func CreateCountry(c Country) (Country, error) {
 	id, err := sess.Collection("Countries").Insert(c)
 	logIfError(err)
 	log.Println(id)
+	log.Println("CreatedAt ", c.CreatedAt)
+	log.Println("UpdatedAt ", c.UpdatedAt)
 	return c, err
 }
 
@@ -120,8 +122,8 @@ func UpdateCountry(country Country) error {
 	defer res.Close()
 
 	err = res.Update(Country{
-		Name: country.Name,
-		//UpdatedAt: time.Now(),
+		Name:      country.Name,
+		UpdatedAt: time.Now(),
 	})
 
 	return err
