@@ -10,12 +10,19 @@ import (
 	"upper.io/db.v3/sqlite"
 )
 
+//Server ... Set this value to sqlite3 or pg to change underlying server
 var Server string
 
+func init() {
+	Server = "sqlite3"
+}
+
+//Env ... Global environment
 type Env struct {
 	db *sqlbuilder.Database
 }
 
+// CommonFields ... Used in models
 type CommonFields struct {
 	CreatedAt time.Time  `db:"CreatedAt"`
 	UpdatedAt time.Time  `db:"UpdatedAt"`
@@ -26,7 +33,6 @@ var sqliteSettings = sqlite.ConnectionURL{
 	Database: `./db/migrations/database.sqlite`,
 }
 
-// ConnectionURL implements a PostgreSQL connection struct.
 var pgSettings = postgresql.ConnectionURL{
 	Host:     "localhost", // PostgreSQL server IP or name.
 	Database: "test",      // Database name.
@@ -34,14 +40,8 @@ var pgSettings = postgresql.ConnectionURL{
 	Password: "abc123",    // Optional user password.
 }
 
-func init() {
-	Server = "sqlite3"
-}
-
-// Connects to database and returns the database object if successful
-// Otherwise err is also returned
+// ConnectDB ... Connects to database and returns the database object if successful. Otherwise err is also returned
 func ConnectDB() (sqlbuilder.Database, error) {
-
 	var db sqlbuilder.Database
 	var err error
 
