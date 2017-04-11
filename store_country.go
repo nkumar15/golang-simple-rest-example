@@ -26,15 +26,14 @@ func GetCountries() ([]Country, error) {
 	countries := make([]Country, 0)
 
 	col := sess.Collection("Countries")
-
 	res := col.Find()
 	defer res.Close()
 
 	err = res.All(&countries)
-
 	if err == db.ErrNoMoreRows {
 		return make([]Country, 0), nil
 	}
+
 	return countries, err
 }
 
@@ -49,13 +48,10 @@ func GetCountry(code string) (Country, error) {
 	var country Country
 
 	col := sess.Collection("Countries")
-
 	res := col.Find(db.Cond{"Code": code})
-
 	defer res.Close()
 
 	err = res.One(&country)
-
 	if err == db.ErrNoMoreRows {
 		return country, ErrNoMoreRows
 	}
@@ -65,6 +61,7 @@ func GetCountry(code string) (Country, error) {
 
 //CreateCountry ...
 func CreateCountry(c Country) (Country, error) {
+
 	sess, err := ConnectDB()
 	logIfError(err)
 
@@ -75,10 +72,14 @@ func CreateCountry(c Country) (Country, error) {
 	c.DeletedAt = nil
 
 	id, err := sess.Collection("Countries").Insert(c)
-	logIfError(err)
-	log.Println(id)
-	log.Println("CreatedAt ", c.CreatedAt)
-	log.Println("UpdatedAt ", c.UpdatedAt)
+	if err != nil {
+		return Country{}, err
+	}
+
+	if i, ok := id.(int); ok {
+		c.ID = i
+	}
+
 	return c, err
 }
 
