@@ -30,7 +30,7 @@ type CommonFields struct {
 }
 
 var sqliteSettings = sqlite.ConnectionURL{
-	Database: `./db/migrations/database.sqlite`,
+	Database: `D:\programming\database\location\database.sqlite`,
 }
 
 var pgSettings = postgresql.ConnectionURL{

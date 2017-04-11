@@ -12,7 +12,6 @@ func logIfError(err error) {
 	if err != nil {
 		log.Println("Error: ", err)
 	}
-
 }
 
 //GetCountries ...
