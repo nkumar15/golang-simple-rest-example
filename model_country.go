@@ -1,14 +1,9 @@
 package location
 
-import (
-	"time"
-)
-
+// Country Model
 type Country struct {
-	ID        int        `db:"Id,omitempty"`
-	Code      string     `db:"Code,omitempty"`
-	Name      string     `db:"Name,omitempty"`
-	CreatedAt time.Time  `db:"CreatedAt"`
-	UpdatedAt time.Time  `db:"UpdatedAt"`
-	DeletedAt *time.Time `db:"DeletedAt,omitempty"`
+	ID           int    `db:"Id,omitempty"`
+	Code         string `db:"Code,omitempty"`
+	Name         string `db:"Name,omitempty"`
+	CommonFields `db:",inline"`
 }

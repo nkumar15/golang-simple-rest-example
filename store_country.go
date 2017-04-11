@@ -3,6 +3,7 @@ package location
 import (
 	"log"
 	"time"
+
 	"upper.io/db.v3"
 )
 
@@ -14,6 +15,7 @@ func logIfError(err error) {
 
 }
 
+//GetCountries ...
 func GetCountries() ([]Country, error) {
 
 	sess, err := ConnectDB()
@@ -36,6 +38,7 @@ func GetCountries() ([]Country, error) {
 	return countries, err
 }
 
+//GetCountry ...
 func GetCountry(code string) (Country, error) {
 
 	sess, err := ConnectDB()
@@ -60,6 +63,7 @@ func GetCountry(code string) (Country, error) {
 	return country, err
 }
 
+//CreateCountry ...
 func CreateCountry(c Country) (Country, error) {
 	sess, err := ConnectDB()
 	logIfError(err)
@@ -78,6 +82,7 @@ func CreateCountry(c Country) (Country, error) {
 	return c, err
 }
 
+//DeleteCountry ...
 func DeleteCountry(code string) error {
 
 	sess, err := ConnectDB()
@@ -94,6 +99,7 @@ func DeleteCountry(code string) error {
 	return err
 }
 
+//DeleteCountries ...
 func DeleteCountries() error {
 
 	sess, err := ConnectDB()
@@ -110,6 +116,7 @@ func DeleteCountries() error {
 	return err
 }
 
+//UpdateCountry ...
 func UpdateCountry(country Country) error {
 	sess, err := ConnectDB()
 	logIfError(err)
@@ -122,8 +129,10 @@ func UpdateCountry(country Country) error {
 	defer res.Close()
 
 	err = res.Update(Country{
-		Name:      country.Name,
-		UpdatedAt: time.Now(),
+		Name: country.Name,
+		CommonFields: CommonFields{
+			UpdatedAt: time.Now(),
+		},
 	})
 
 	return err

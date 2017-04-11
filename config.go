@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"time"
+
 	"upper.io/db.v3/lib/sqlbuilder"
 	"upper.io/db.v3/postgresql"
 	"upper.io/db.v3/sqlite"
@@ -22,7 +23,7 @@ type CommonFields struct {
 }
 
 var sqliteSettings = sqlite.ConnectionURL{
-	Database: `../db/migrations/database.sqlite`,
+	Database: `./db/migrations/database.sqlite`,
 }
 
 // ConnectionURL implements a PostgreSQL connection struct.
@@ -34,7 +35,7 @@ var pgSettings = postgresql.ConnectionURL{
 }
 
 func init() {
-	Server = "pg"
+	Server = "sqlite3"
 }
 
 // Connects to database and returns the database object if successful
@@ -44,7 +45,7 @@ func ConnectDB() (sqlbuilder.Database, error) {
 	var db sqlbuilder.Database
 	var err error
 
-	if Server == "sqlite" {
+	if Server == "sqlite3" {
 		db, err = sqlite.Open(sqliteSettings)
 	} else if Server == "pg" {
 		db, err = postgresql.Open(pgSettings)
