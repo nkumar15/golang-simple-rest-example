@@ -21,29 +21,34 @@ func showMsg(err error, t *testing.T) {
 	if err != nil {
 		t.Error(t.Name() + " failed with error" + err.Error())
 	} else {
-		t.Log(t.Name() + " successful.")
+		t.Log(t.Name() + " success.")
 	}
 }
 
-func Test_ConnectDB(t *testing.T) {
+func TestCountry(t *testing.T) {
+	t.Run("ConnectDB", func(t *testing.T) { DBConnectTest(t) })
+	t.Run("DeleteCountries", func(t *testing.T) { CountryDeleteAllTest(t) })
+	t.Run("CreateCountry", func(t *testing.T) { CountryCreateTest(t) })
+	t.Run("GetCountry", func(t *testing.T) { CountryGetTest(t) })
+	t.Run("GetCountries", func(t *testing.T) { CountryGetAllTest(t) })
+	t.Run("UpdateCountry", func(t *testing.T) { CountryUpdateTest(t) })
+	t.Run("DeleteCountry", func(t *testing.T) { CountryDeleteTest(t) })
+	t.Run("DeleteCountries", func(t *testing.T) { CountryDeleteAllTest(t) })
+}
+
+func DBConnectTest(t *testing.T) {
 
 	_, err := ConnectDB()
 	showMsg(err, t)
 }
 
-func Test_DeleteCountries(t *testing.T) {
-
-	err := DeleteCountries()
-	showMsg(err, t)
-}
-
-func Test_CreateCountry(t *testing.T) {
+func CountryCreateTest(t *testing.T) {
 
 	_, err := CreateCountry(countries[0])
 	showMsg(err, t)
 }
 
-func Test_GetCountry(t *testing.T) {
+func CountryGetTest(t *testing.T) {
 
 	country, err := GetCountry(countries[0].Code)
 	if err != nil {
@@ -53,7 +58,7 @@ func Test_GetCountry(t *testing.T) {
 	}
 }
 
-func Test_GetCountries(t *testing.T) {
+func CountryGetAllTest(t *testing.T) {
 
 	_, err := CreateCountry(countries[1])
 	showMsg(err, t)
@@ -69,7 +74,7 @@ func Test_GetCountries(t *testing.T) {
 	showMsg(nil, t)
 }
 
-func Test_UpdateCountry(t *testing.T) {
+func CountryUpdateTest(t *testing.T) {
 
 	var changedCountry Country
 	changedCountry.Code = countries[0].Code
@@ -102,8 +107,14 @@ func Test_UpdateCountry(t *testing.T) {
 	showMsg(nil, t)
 }
 
-func Test_DeleteCountry(t *testing.T) {
+func CountryDeleteTest(t *testing.T) {
 	code := countries[1].Code
 	err := DeleteCountry(code)
+	showMsg(err, t)
+}
+
+func CountryDeleteAllTest(t *testing.T) {
+
+	err := DeleteCountries()
 	showMsg(err, t)
 }
