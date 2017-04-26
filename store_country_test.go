@@ -3,6 +3,8 @@ package location
 import (
 	"errors"
 	"testing"
+
+	"upper.io/db.v2/sqlite"
 )
 
 var countries = []Country{
@@ -26,31 +28,37 @@ func showMsg(err error, t *testing.T) {
 }
 
 func TestCountry(t *testing.T) {
-	t.Run("ConnectDB", func(t *testing.T) { DBConnectTest(t) })
-	t.Run("DeleteCountries", func(t *testing.T) { CountryDeleteAllTest(t) })
-	t.Run("CreateCountry", func(t *testing.T) { CountryCreateTest(t) })
-	t.Run("GetCountry", func(t *testing.T) { CountryGetTest(t) })
-	t.Run("GetCountries", func(t *testing.T) { CountryGetAllTest(t) })
-	t.Run("UpdateCountry", func(t *testing.T) { CountryUpdateTest(t) })
-	t.Run("DeleteCountry", func(t *testing.T) { CountryDeleteTest(t) })
-	t.Run("DeleteCountries", func(t *testing.T) { CountryDeleteAllTest(t) })
+
+	var sqliteSettings = sqlite.ConnectionURL{
+		Database: `D:\programming\database\location\database.sqlite`,
+	}
+	db, err := sqlite.Open(sqliteSettings)
+	if err != nil {
+		t.Error(t.Name() + " connection failed" + err.Error())
+	}
+
+	var env Env
+	env.Database.DB = db
+	defer env.Database.DB.Close()
+
+	t.Run("DeleteCountries", func(t *testing.T) { CountryDeleteAllTest(t, env) })
+	t.Run("CreateCountry", func(t *testing.T) { CountryCreateTest(t, env) })
+	t.Run("GetCountry", func(t *testing.T) { CountryGetTest(t, env) })
+	t.Run("GetCountries", func(t *testing.T) { CountryGetAllTest(t, env) })
+	t.Run("UpdateCountry", func(t *testing.T) { CountryUpdateTest(t, env) })
+	t.Run("DeleteCountry", func(t *testing.T) { CountryDeleteTest(t, env) })
+	t.Run("DeleteCountries", func(t *testing.T) { CountryDeleteAllTest(t, env) })
 }
 
-func DBConnectTest(t *testing.T) {
+func CountryCreateTest(t *testing.T, env Env) {
 
-	_, err := ConnectDB()
+	_, err := env.Database.CreateCountry(countries[0])
 	showMsg(err, t)
 }
 
-func CountryCreateTest(t *testing.T) {
+func CountryGetTest(t *testing.T, env Env) {
 
-	_, err := CreateCountry(countries[0])
-	showMsg(err, t)
-}
-
-func CountryGetTest(t *testing.T) {
-
-	country, err := GetCountry(countries[0].Code)
+	country, err := env.Database.GetCountry(countries[0].Code)
 	if err != nil {
 		showMsg(err, t)
 	} else if country.Name != countries[0].Name {
@@ -58,13 +66,13 @@ func CountryGetTest(t *testing.T) {
 	}
 }
 
-func CountryGetAllTest(t *testing.T) {
+func CountryGetAllTest(t *testing.T, env Env) {
 
-	_, err := CreateCountry(countries[1])
+	_, err := env.Database.CreateCountry(countries[1])
 	showMsg(err, t)
 
 	var cntries []Country
-	cntries, err = GetCountries()
+	cntries, err = env.Database.GetCountries()
 
 	showMsg(err, t)
 	if cntries[0].Code != countries[0].Code || cntries[0].Name != countries[0].Name ||
@@ -74,17 +82,17 @@ func CountryGetAllTest(t *testing.T) {
 	showMsg(nil, t)
 }
 
-func CountryUpdateTest(t *testing.T) {
+func CountryUpdateTest(t *testing.T, env Env) {
 
 	var changedCountry Country
 	changedCountry.Code = countries[0].Code
 	changedCountry.Name = "Hindustan"
 
-	err := UpdateCountry(changedCountry)
+	err := env.Database.UpdateCountry(changedCountry)
 	showMsg(err, t)
 
 	var country Country
-	country, err = GetCountry(changedCountry.Code)
+	country, err = env.Database.GetCountry(changedCountry.Code)
 
 	showMsg(err, t)
 
@@ -93,10 +101,10 @@ func CountryUpdateTest(t *testing.T) {
 	}
 
 	changedCountry.Name = countries[0].Name
-	err = UpdateCountry(changedCountry)
+	err = env.Database.UpdateCountry(changedCountry)
 	showMsg(err, t)
 
-	country, err = GetCountry(changedCountry.Code)
+	country, err = env.Database.GetCountry(changedCountry.Code)
 
 	showMsg(err, t)
 
@@ -107,14 +115,14 @@ func CountryUpdateTest(t *testing.T) {
 	showMsg(nil, t)
 }
 
-func CountryDeleteTest(t *testing.T) {
+func CountryDeleteTest(t *testing.T, env Env) {
 	code := countries[1].Code
-	err := DeleteCountry(code)
+	err := env.Database.DeleteCountry(code)
 	showMsg(err, t)
 }
 
-func CountryDeleteAllTest(t *testing.T) {
+func CountryDeleteAllTest(t *testing.T, env Env) {
 
-	err := DeleteCountries()
+	err := env.Database.DeleteCountries()
 	showMsg(err, t)
 }
