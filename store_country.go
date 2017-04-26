@@ -1,35 +1,22 @@
 package location
 
 import (
-	"log"
 	"time"
 
-	"upper.io/db.v3"
+	db "upper.io/db.v2"
 )
 
-func logIfError(err error) {
-
-	if err != nil {
-		log.Println("Error: ", err)
-	}
-}
-
 //GetCountries ...
-func GetCountries() ([]Country, error) {
-
-	sess, err := ConnectDB()
-	logIfError(err)
-
-	defer sess.Close()
+func (lcdb *lcDatabase) GetCountries() ([]Country, error) {
 
 	countries := make([]Country, 0)
 
-	col := sess.Collection("Countries")
+	col := lcdb.DB.Collection("Countries")
 	res := col.Find()
 	defer res.Close()
 
-	err = res.All(&countries)
-	if err == db.ErrNoMoreRows {
+	err := res.All(&countries)
+	if err == ErrNoMoreRows {
 		return make([]Country, 0), nil
 	}
 
@@ -37,21 +24,16 @@ func GetCountries() ([]Country, error) {
 }
 
 //GetCountry ...
-func GetCountry(code string) (Country, error) {
-
-	sess, err := ConnectDB()
-	logIfError(err)
-
-	defer sess.Close()
+func (lcdb *lcDatabase) GetCountry(code string) (Country, error) {
 
 	var country Country
 
-	col := sess.Collection("Countries")
+	col := lcdb.DB.Collection("Countries")
 	res := col.Find(db.Cond{"Code": code})
 	defer res.Close()
 
-	err = res.One(&country)
-	if err == db.ErrNoMoreRows {
+	err := res.One(&country)
+	if err == ErrNoMoreRows {
 		return country, ErrNoMoreRows
 	}
 
@@ -59,18 +41,13 @@ func GetCountry(code string) (Country, error) {
 }
 
 //CreateCountry ...
-func CreateCountry(c Country) (Country, error) {
-
-	sess, err := ConnectDB()
-	logIfError(err)
-
-	defer sess.Close()
+func (lcdb *lcDatabase) CreateCountry(c Country) (Country, error) {
 
 	c.CreatedAt = time.Now()
 	c.UpdatedAt = time.Now()
 	c.DeletedAt = nil
 
-	id, err := sess.Collection("Countries").Insert(c)
+	id, err := lcdb.DB.Collection("Countries").Insert(c)
 	if err != nil {
 		return Country{}, err
 	}
@@ -83,52 +60,38 @@ func CreateCountry(c Country) (Country, error) {
 }
 
 //DeleteCountry ...
-func DeleteCountry(code string) error {
+func (lcdb *lcDatabase) DeleteCountry(code string) error {
 
-	sess, err := ConnectDB()
-	logIfError(err)
-
-	defer sess.Close()
-
-	col := sess.Collection("Countries")
+	col := lcdb.DB.Collection("Countries")
 
 	res := col.Find(db.Cond{"code": code})
 	defer res.Close()
-	err = res.Delete()
+	err := res.Delete()
 
 	return err
 }
 
 //DeleteCountries ...
-func DeleteCountries() error {
+func (lcdb *lcDatabase) DeleteCountries() error {
 
-	sess, err := ConnectDB()
-	logIfError(err)
-
-	defer sess.Close()
-
-	col := sess.Collection("Countries")
+	col := lcdb.DB.Collection("Countries")
 
 	res := col.Find()
 	defer res.Close()
-	err = res.Delete()
+	err := res.Delete()
 
 	return err
 }
 
 //UpdateCountry ...
-func UpdateCountry(country Country) error {
-	sess, err := ConnectDB()
-	logIfError(err)
+func (lcdb *lcDatabase) UpdateCountry(country Country) error {
 
-	defer sess.Close()
-
-	col := sess.Collection("Countries")
+	col := lcdb.DB.Collection("Countries")
 
 	res := col.Find("Code", country.Code)
 	defer res.Close()
 
-	err = res.Update(Country{
+	err := res.Update(Country{
 		Name: country.Name,
 		CommonFields: CommonFields{
 			UpdatedAt: time.Now(),
@@ -136,5 +99,4 @@ func UpdateCountry(country Country) error {
 	})
 
 	return err
-
 }

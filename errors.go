@@ -2,6 +2,7 @@ package location
 
 import "errors"
 
+// Error codes ...
 var (
 	ErrNoMoreRows               = errors.New(`location: no more rows in this result set`)
 	ErrUniqueConstraint         = errors.New(`location: UNIQUE constraint failed`)

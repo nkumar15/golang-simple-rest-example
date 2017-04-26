@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
-	"upper.io/db.v3/lib/sqlbuilder"
-	"upper.io/db.v3/postgresql"
-	"upper.io/db.v3/sqlite"
+	"upper.io/db.v2/lib/sqlbuilder"
+	"upper.io/db.v2/postgresql"
+	"upper.io/db.v2/sqlite"
 )
 
 //Server ... Set this value to sqlite3 or pg to change underlying server
@@ -17,9 +17,13 @@ func init() {
 	Server = "sqlite3"
 }
 
+type lcDatabase struct {
+	DB sqlbuilder.Database
+}
+
 //Env ... Global environment
 type Env struct {
-	db *sqlbuilder.Database
+	Database lcDatabase
 }
 
 // CommonFields ... Used in models

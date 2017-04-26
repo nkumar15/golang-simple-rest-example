@@ -2,17 +2,19 @@ package location
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/gorilla/mux"
 )
 
-func GetCountriesHandler(w http.ResponseWriter, r *http.Request) {
+// GetCountriesHandler ...
+func (env *Env) GetCountriesHandler(w http.ResponseWriter, r *http.Request) {
 
-	countries, err := GetCountries()
+	countries, err := env.Database.GetCountries()
 
 	if err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -26,7 +28,8 @@ func GetCountriesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetCountryHandler(w http.ResponseWriter, r *http.Request) {
+// GetCountryHandler ...
+func (env *Env) GetCountryHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 
@@ -34,7 +37,8 @@ func GetCountryHandler(w http.ResponseWriter, r *http.Request) {
 	code := vars["code"]
 
 	var country Country
-	country, err := GetCountry(code)
+
+	country, err := env.Database.GetCountry(code)
 
 	if err != nil {
 		if err == ErrNoMoreRows {
@@ -53,7 +57,8 @@ func GetCountryHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func CreateCountryHandler(w http.ResponseWriter, r *http.Request) {
+// CreateCountryHandler ...
+func (env *Env) CreateCountryHandler(w http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 
@@ -78,7 +83,7 @@ func CreateCountryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c, err := CreateCountry(country)
+	c, err := env.Database.CreateCountry(country)
 
 	if err != nil {
 		log.Println("Some error from create country")
@@ -88,18 +93,18 @@ func CreateCountryHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
-	} else {
-		log.Println("creating proper response")
-		w.Header().Set("Content-Type", "application/json;charset=UTF-8")
-		w.WriteHeader(http.StatusCreated)
-		if err := json.NewEncoder(w).Encode(c); err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
+	}
+
+	log.Println("creating proper response")
+	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
+	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(c); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
-/*
-func UpdateCityByIdHandler(w http.ResponseWriter, r *http.Request) {
+/* UpdateCityByIdHandler ...
+func (env *Env)UpdateCityByIdHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 
@@ -146,18 +151,18 @@ func UpdateCityByIdHandler(w http.ResponseWriter, r *http.Request) {
 }
 */
 
-func DeleteCountryHandler(w http.ResponseWriter, r *http.Request) {
+// DeleteCountryHandler ...
+func (env *Env) DeleteCountryHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 	vars := mux.Vars(r)
 	code := vars["code"]
 
-	err := DeleteCountry(code)
+	err := env.Database.DeleteCountry(code)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		panic(err)
-
 	}
 
 	w.WriteHeader(http.StatusNoContent)

@@ -1,14 +1,16 @@
 package location
 
 import (
-	"github.com/gorilla/mux"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
-func NewRouter() *mux.Router {
+// NewRouter ...
+func (env *Env) NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 
-	for _, route := range countryRoutes {
+	for _, route := range env.countryRoutes() {
 		var handler http.Handler
 
 		handler = route.HandlerFunc
@@ -20,7 +22,7 @@ func NewRouter() *mux.Router {
 			Handler(handler)
 	}
 
-	for _, route := range cityRoutes {
+	for _, route := range env.cityRoutes() {
 		var handler http.Handler
 
 		handler = route.HandlerFunc
@@ -32,16 +34,5 @@ func NewRouter() *mux.Router {
 			Handler(handler)
 	}
 
-	for _, route := range branchRoutes {
-		var handler http.Handler
-
-		handler = route.HandlerFunc
-		handler = Logger(handler, route.Name)
-		router.
-			Methods(route.Method).
-			Path(route.Pattern).
-			Name(route.Name).
-			Handler(handler)
-	}
 	return router
 }
