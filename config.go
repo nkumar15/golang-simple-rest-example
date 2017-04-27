@@ -3,7 +3,7 @@ package location
 import (
 	"time"
 
-	"upper.io/db.v2/lib/sqlbuilder"
+	"upper.io/db.v3/lib/sqlbuilder"
 )
 
 type lcDatabase struct {

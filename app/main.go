@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/nkumar15/location"
-	"upper.io/db.v2/lib/sqlbuilder"
-	"upper.io/db.v2/postgresql"
-	"upper.io/db.v2/sqlite"
+	"upper.io/db.v3/lib/sqlbuilder"
+	"upper.io/db.v3/postgresql"
+	"upper.io/db.v3/sqlite"
 )
 
 var sqliteSettings = sqlite.ConnectionURL{
