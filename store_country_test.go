@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"upper.io/db.v2/sqlite"
+	"upper.io/db.v3/sqlite"
 )
 
 var countries = []Country{

@@ -3,7 +3,7 @@ package location
 import (
 	"time"
 
-	db "upper.io/db.v2"
+	db "upper.io/db.v3"
 )
 
 //GetCountries ...
