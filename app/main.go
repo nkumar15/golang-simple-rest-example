@@ -47,7 +47,6 @@ func serveWeb() {
 
 	env := location.Env{}
 	env.Database.DB = db
-	env.DBInstance = "sqlite3"
 
 	router := env.NewRouter()
 	log.Fatal(http.ListenAndServe(":5000", router))

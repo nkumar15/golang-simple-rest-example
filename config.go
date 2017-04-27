@@ -12,8 +12,7 @@ type lcDatabase struct {
 
 //Env ... Global environment
 type Env struct {
-	DBInstance string
-	Database   lcDatabase
+	Database lcDatabase
 }
 
 // CommonFields ... Used in models
