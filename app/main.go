@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	logs "github.com/astaxie/beego/logs"
 	"github.com/nkumar15/location"
 	"upper.io/db.v3/lib/sqlbuilder"
 	"upper.io/db.v3/postgresql"
@@ -11,7 +12,7 @@ import (
 )
 
 var sqliteSettings = sqlite.ConnectionURL{
-	Database: `D:\programming\database\location\database.sqlite`,
+	Database: `D:\codes\database\location\database.sqlite`,
 }
 
 var pgSettings = postgresql.ConnectionURL{
@@ -46,7 +47,12 @@ func serveWeb() {
 	}
 
 	env := location.Env{}
+
 	env.Database.DB = db
+
+	logger := logs.NewLogger()
+	var config location.LogConfig
+	env.SetupLogger(logger, config)
 
 	router := env.NewRouter()
 	log.Fatal(http.ListenAndServe(":5000", router))
