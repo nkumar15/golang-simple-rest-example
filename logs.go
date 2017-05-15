@@ -3,7 +3,7 @@ package location
 import (
 	"fmt"
 
-	logs "github.com/astaxie/beego/logs"
+	"github.com/astaxie/beego/logs"
 )
 
 // LogConfig ...
